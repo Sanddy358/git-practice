@@ -64,12 +64,27 @@ app.get('/', (req, res) => {
                         <div class="endpoint">
                             <strong>GET /api/hello</strong> - Simple JSON response
                         </div>
-
+                        <div class="endpoint">
+                            <strong>GET /api/users</strong> - Get all users
+                        </div>
+                        <div class="endpoint">
+                            <strong>POST /api/users</strong> - Create a new user
+                        </div>
+                        <div class="endpoint">
+                            <strong>GET /api/users/:id</strong> - Get user by ID
+                        </div>
+                        <div class="endpoint">
+                            <strong>PUT /api/users/:id</strong> - Update user by ID
+                        </div>
+                        <div class="endpoint">
+                            <strong>DELETE /api/users/:id</strong> - Delete user by ID
+                        </div>
                     </div>
                     
                     <p><strong>Try these URLs:</strong></p>
                     <ul>
                         <li><a href="/api/hello">http://localhost:${PORT}/api/hello</a></li>
+                        <li><a href="/api/users">http://localhost:${PORT}/api/users</a></li>
                     </ul>
                 </div>
             </body>
@@ -78,11 +93,157 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
+// Sample users data
+let users = [
+    { id: 1, name: 'Alice', email: 'alice@example.com' },
+    { id: 2, name: 'Bob', email: 'bob@example.com' },
+    { id: 3, name: 'Charlie', email: 'charlie@example.com' }
+];
+
 app.get('/api/hello', (req, res) => {
     res.json({
         message: 'Hello from Git Practice Server!',
         timestamp: new Date().toISOString(),
         version: '1.0.0'
+    });
+});
+
+// Get all users
+app.get('/api/users', (req, res) => {
+    res.json({
+        success: true,
+        data: users,
+        count: users.length
+    });
+});
+
+// Create a new user
+app.post('/api/users', (req, res) => {
+    const { name, email } = req.body;
+    
+    if (!name || !email) {
+        return res.status(400).json({
+            success: false,
+            error: 'Name and email are required'
+        });
+    }
+    
+    // Check if email already exists
+    const existingUser = users.find(user => user.email === email);
+    if (existingUser) {
+        return res.status(400).json({
+            success: false,
+            error: 'Email already exists'
+        });
+    }
+    
+    const newUser = {
+        id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+        name,
+        email
+    };
+    
+    users.push(newUser);
+    
+    res.status(201).json({
+        success: true,
+        data: newUser,
+        message: 'User created successfully'
+    });
+});
+
+// Get user by ID
+app.get('/api/users/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    
+    if (isNaN(userId)) {
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid user ID'
+        });
+    }
+    
+    const user = users.find(u => u.id === userId);
+    
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            error: 'User not found'
+        });
+    }
+    
+    res.json({
+        success: true,
+        data: user
+    });
+});
+
+// Update user by ID
+app.put('/api/users/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    const { name, email } = req.body;
+    
+    if (isNaN(userId)) {
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid user ID'
+        });
+    }
+    
+    const userIndex = users.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            error: 'User not found'
+        });
+    }
+    
+    // Check if email already exists (excluding current user)
+    if (email && users.some(user => user.email === email && user.id !== userId)) {
+        return res.status(400).json({
+            success: false,
+            error: 'Email already exists'
+        });
+    }
+    
+    // Update user fields
+    if (name) users[userIndex].name = name;
+    if (email) users[userIndex].email = email;
+    
+    res.json({
+        success: true,
+        data: users[userIndex],
+        message: 'User updated successfully'
+    });
+});
+
+// Delete user by ID
+app.delete('/api/users/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    
+    if (isNaN(userId)) {
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid user ID'
+        });
+    }
+    
+    const userIndex = users.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            error: 'User not found'
+        });
+    }
+    
+    const deletedUser = users.splice(userIndex, 1)[0];
+    
+    res.json({
+        success: true,
+        data: deletedUser,
+        message: 'User deleted successfully'
     });
 });
 

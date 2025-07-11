@@ -50,11 +50,52 @@ The server will start on `http://localhost:3000`
 ### GET `/api/hello`
 - Simple JSON response with timestamp
 
+### GET `/api/users`
+- Get all users
+- Response: `{ success: true, data: [...], count: number }`
+
+### POST `/api/users`
+- Create a new user
+- Body: `{ name: string, email: string }`
+- Response: `{ success: true, data: {...}, message: string }`
+
+### GET `/api/users/:id`
+- Get user by ID
+- Response: `{ success: true, data: {...} }`
+
+### PUT `/api/users/:id`
+- Update user by ID
+- Body: `{ name?: string, email?: string }`
+- Response: `{ success: true, data: {...}, message: string }`
+
+### DELETE `/api/users/:id`
+- Delete user by ID
+- Response: `{ success: true, data: {...}, message: string }`
+
 ## 📝 Example Usage
 
 ```bash
 # Get hello message
 curl http://localhost:3000/api/hello
+
+# Get all users
+curl http://localhost:3000/api/users
+
+# Create a new user
+curl -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "John Doe", "email": "john@example.com"}'
+
+# Get user by ID
+curl http://localhost:3000/api/users/1
+
+# Update user
+curl -X PUT http://localhost:3000/api/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Jane Doe"}'
+
+# Delete user
+curl -X DELETE http://localhost:3000/api/users/1
 ```
 
 ## 🌟 Git Practice Ideas
