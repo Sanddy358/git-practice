@@ -103,6 +103,7 @@ app.use((err, req, res, next) => {
     });
 });
 
+
 // Check the api version
 app.get('/api/version', (req, res) => {
     res.json({ version: '1.1.0' });
